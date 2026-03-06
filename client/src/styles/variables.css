@@ -1,0 +1,72 @@
+:root {
+  /* ── Primary Colors ── */
+  --color-primary: #4f46e5;          /* Indigo - main brand color */
+  --color-primary-dark: #3730a3;     /* Darker indigo for hover */
+  --color-primary-light: #e0e7ff;    /* Light indigo for backgrounds */
+  --color-accent: #06b6d4;           /* Cyan - secondary accent */
+
+  /* ── Semantic Colors ── */
+  --color-success: #10b981;          /* Green - for good scores */
+  --color-warning: #f59e0b;          /* Amber - for medium issues */
+  --color-danger: #ef4444;           /* Red - for critical issues */
+  --color-info: #3b82f6;             /* Blue - for informational */
+
+  /* ── Issue Type Colors ── */
+  --color-ambiguity: #f59e0b;        /* Amber for ambiguity issues */
+  --color-testability: #ef4444;      /* Red for non-testable issues */
+  --color-incompleteness: #8b5cf6;   /* Purple for incompleteness */
+
+  /* ── Neutral / Background ── */
+  --color-bg: #f8fafc;               /* Page background */
+  --color-surface: #ffffff;          /* Cards, navbar, panels */
+  --color-surface-secondary: #f1f5f9;/* Secondary panels */
+  --color-border: #e2e8f0;           /* Borders and dividers */
+
+  /* ── Text Colors ── */
+  --color-text-primary: #1e293b;     /* Main body text */
+  --color-text-secondary: #64748b;   /* Subtext, labels */
+  --color-text-muted: #94a3b8;       /* Placeholder, disabled */
+  --color-text-inverse: #ffffff;     /* Text on dark backgrounds */
+
+  /* ── Typography ── */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+
+  /* ── Spacing ── */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.15);
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* ── Layout ── */
+  --max-width: 1200px;
+  --navbar-height: 64px;
+}
