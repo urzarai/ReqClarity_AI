@@ -1,0 +1,116 @@
+/* ════════════════════════════════════════
+   DROPZONE
+════════════════════════════════════════ */
+
+.dropzone-wrapper {
+  width: 100%;
+}
+
+.dropzone {
+  border: 2.5px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 3.5rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  transition: all var(--transition-base);
+  position: relative;
+  user-select: none;
+}
+
+.dropzone:hover:not(.dropzone-disabled) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.dropzone:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.dropzone-dragging {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-md);
+}
+
+.dropzone-error {
+  border-color: var(--color-danger);
+  background-color: #fff5f5;
+}
+
+.dropzone-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.dropzone-input {
+  display: none;
+}
+
+.dropzone-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+  transition: transform var(--transition-base);
+}
+
+.dropzone-dragging .dropzone-icon {
+  transform: scale(1.15);
+}
+
+.dropzone-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.dropzone-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.dropzone-browse {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dropzone-accepted {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.dropzone-badge {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+}
+
+.dropzone-size {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.dropzone-error-msg {
+  margin-top: 0.75rem;
+  padding: 0.65rem 1rem;
+  background-color: #fee2e2;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: #991b1b;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
