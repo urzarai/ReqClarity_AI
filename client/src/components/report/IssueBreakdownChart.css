@@ -1,0 +1,88 @@
+/* ════════════════════════════════════════
+   ISSUE BREAKDOWN CHART
+════════════════════════════════════════ */
+
+.issue-breakdown-chart {
+  width: 100%;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  gap: 0.5rem;
+}
+
+.chart-empty span {
+  font-size: 2rem;
+}
+
+.chart-tooltip {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.9rem;
+  box-shadow: var(--shadow-md);
+}
+
+.chart-tooltip-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.chart-tooltip-value {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ── Summary Table ── */
+.issue-breakdown-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.issue-breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--font-size-sm);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.issue-breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.issue-breakdown-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.issue-breakdown-name {
+  flex: 1;
+  color: var(--color-text-secondary);
+}
+
+.issue-breakdown-count {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.issue-breakdown-total {
+  font-weight: 700;
+}
+
+.issue-breakdown-total .issue-breakdown-name {
+  color: var(--color-text-primary);
+}

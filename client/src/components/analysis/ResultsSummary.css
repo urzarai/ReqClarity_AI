@@ -1,0 +1,155 @@
+/* ════════════════════════════════════════
+   RESULTS SUMMARY
+════════════════════════════════════════ */
+
+.results-summary {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+/* ── Score Block ── */
+.summary-score-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.summary-score-number {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.summary-score-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-score-label {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.summary-score-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Score color variants */
+.summary-score-good .summary-score-number,
+.summary-score-good .summary-score-label {
+  color: var(--color-success);
+}
+
+.summary-score-fair .summary-score-number,
+.summary-score-fair .summary-score-label {
+  color: var(--color-warning);
+}
+
+.summary-score-poor .summary-score-number,
+.summary-score-poor .summary-score-label {
+  color: var(--color-danger);
+}
+
+.summary-score-critical .summary-score-number,
+.summary-score-critical .summary-score-label {
+  color: #7f1d1d;
+}
+
+/* ── Divider ── */
+.summary-divider {
+  width: 1px;
+  height: 60px;
+  background-color: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ── File Info ── */
+.summary-file {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 200px;
+  overflow: hidden;
+  padding-left: 1rem;
+}
+
+.summary-file-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.summary-file-name {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.summary-file-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ── Issue Counts ── */
+.summary-issues {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.summary-issue-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 64px;
+}
+
+.summary-issue-count {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.summary-issue-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.summary-issue-ambiguity .summary-issue-count { color: var(--color-ambiguity); }
+.summary-issue-testability .summary-issue-count { color: var(--color-testability); }
+.summary-issue-incompleteness .summary-issue-count { color: var(--color-incompleteness); }
+.summary-issue-total .summary-issue-count { color: var(--color-text-primary); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .results-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary-divider {
+    width: 100%;
+    height: 1px;
+  }
+}

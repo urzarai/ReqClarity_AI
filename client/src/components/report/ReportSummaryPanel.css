@@ -1,0 +1,98 @@
+/* ════════════════════════════════════════
+   REPORT SUMMARY PANEL
+════════════════════════════════════════ */
+
+.report-summary-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Key Metrics ── */
+.report-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.report-metric {
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+}
+
+.report-metric-value {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+
+.report-metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* ── Recommendations ── */
+.report-rec-title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.report-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.report-rec-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border-left: 3px solid;
+}
+
+.report-rec-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.report-rec-text {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.report-rec-ambiguity {
+  background-color: #fef3c7;
+  border-left-color: var(--color-ambiguity);
+}
+.report-rec-ambiguity .report-rec-text { color: #78350f; }
+
+.report-rec-testability {
+  background-color: #fee2e2;
+  border-left-color: var(--color-testability);
+}
+.report-rec-testability .report-rec-text { color: #7f1d1d; }
+
+.report-rec-incomplete {
+  background-color: #ede9fe;
+  border-left-color: var(--color-incompleteness);
+}
+.report-rec-incomplete .report-rec-text { color: #4c1d95; }
+
+.report-rec-success {
+  background-color: #d1fae5;
+  border-left-color: var(--color-success);
+}
+.report-rec-success .report-rec-text { color: #065f46; }
