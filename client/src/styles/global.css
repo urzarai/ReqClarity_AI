@@ -36,14 +36,6 @@ body {
   min-height: 100vh;
 }
 
-.page-content {
-  flex: 1;
-  max-width: var(--max-width);
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-xl);
-}
-
 /* ── Page Shell ── */
 .page {
   padding: var(--spacing-xl) 0;

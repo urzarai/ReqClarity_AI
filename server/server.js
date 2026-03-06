@@ -26,11 +26,13 @@ const healthRoutes = require('./routes/healthRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const analysisRoutes = require('./routes/analysisRoutes');
 const requirementRoutes = require('./routes/requirementRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 app.use('/api/health', healthRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/requirements', requirementRoutes);
+app.use('/api/contact', contactRoutes);
 
 // ── Catch-all for undefined routes ──
 app.use((req, res) => {

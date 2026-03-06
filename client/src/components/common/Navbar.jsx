@@ -1,49 +1,48 @@
-import { Link, useLocation } from 'react-router-dom';
-import './Navbar.css';
+import { Link, useLocation } from "react-router-dom";
+import "./Navbar.css";
 
 function Navbar() {
-  const location = useLocation();
+  const { pathname } = useLocation();
+
+  const isActive = (path) =>
+    pathname === path ? "nav-link active" : "nav-link";
 
   return (
     <nav className="navbar">
+      {/* Logo */}
       <div className="navbar-brand">
-        <Link to="/">
+        <Link to="/" className="brand">
           <span className="brand-req">Req</span>
           <span className="brand-clarity">Clarity</span>
           <span className="brand-ai"> AI</span>
         </Link>
       </div>
 
+      {/* Navigation */}
       <ul className="navbar-links">
         <li>
-          <Link
-            to="/"
-            className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}
-          >
+          <Link to="/" className={isActive("/")}>
             Home
           </Link>
         </li>
+
         <li>
-          <Link
-            to="/upload"
-            className={location.pathname === '/upload' ? 'nav-link active' : 'nav-link'}
-          >
+          <Link to="/upload" className={isActive("/upload")}>
             Analyze
           </Link>
         </li>
+
         <li>
-          <Link
-            to="/history"
-            className={location.pathname === '/history' ? 'nav-link active' : 'nav-link'}
-          >
+          <Link to="/history" className={isActive("/history")}>
             History
           </Link>
         </li>
       </ul>
 
-      <div className="navbar-cta">
-        <Link to="/upload" className="btn-primary">
-          Get Started
+      {/* CTA */}
+      <div className="navbar-actions">
+        <Link to="/contact" className="btn-primary">
+          Contact Us
         </Link>
       </div>
     </nav>

@@ -7,19 +7,21 @@ import ResultsPage from './pages/ResultsPage';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
+import ContactPage from './pages/ContactPage';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="app-layout">
         <Navbar />
-        <main className="page-content">
+        <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/results/:id" element={<ResultsPage />} />
             <Route path="/dashboard/:id" element={<DashboardPage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
