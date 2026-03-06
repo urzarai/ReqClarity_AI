@@ -24,3 +24,5 @@ Thumbs.db
 
 # Uploads folder (temp files)
 server/uploads/
+server/uploads/*
+!server/uploads/.gitkeep
