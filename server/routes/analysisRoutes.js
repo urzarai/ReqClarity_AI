@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { analyzeRequirement } = require('../services/detectionService');
 const { analyzeAndScore, getRecommendations } = require('../services/scoringService');
+const { generateRewrite } = require('../services/aiService');
 
 // POST /api/analysis/test-detection — temporary test endpoint
 router.post('/test-detection', (req, res) => {
@@ -91,4 +92,27 @@ router.post('/test-scoring', (req, res) => {
     })),
   });
 });
+
+// POST /api/analysis/test-ai — temporary test endpoint
+router.post('/test-ai', async (req, res) => {
+  const { text, issues } = req.body;
+
+  if (!text || !issues) {
+    return res.status(400).json({
+      success: false,
+      error: 'Please provide "text" and "issues" fields.',
+    });
+  }
+
+  console.log(`🤖 Testing AI rewrite for: "${text.substring(0, 50)}..."`);
+
+  const result = await generateRewrite(text, issues);
+
+  res.json({
+    success: true,
+    original: text,
+    aiResult: result,
+  });
+});
+
 module.exports = router;
