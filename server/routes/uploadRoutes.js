@@ -3,8 +3,9 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fileValidator = require('../middleware/fileValidator');
+const { handleUpload } = require('../controllers/uploadController');
 
-// Configure multer for file storage
+// ── Multer config ──
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -21,17 +22,6 @@ const upload = multer({
 });
 
 // POST /api/upload
-router.post('/', upload.single('document'), fileValidator, (req, res) => {
-  // Placeholder — real logic added on Day 8
-  res.json({
-    success: true,
-    message: 'File upload endpoint ready',
-    file: {
-      originalName: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-    },
-  });
-});
+router.post('/', upload.single('document'), fileValidator, handleUpload);
 
 module.exports = router;
