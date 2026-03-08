@@ -3,6 +3,8 @@ const router = express.Router();
 const { analyzeRequirement } = require('../services/detectionService');
 const { analyzeAndScore, getRecommendations } = require('../services/scoringService');
 const { generateRewrite } = require('../services/aiService');
+const Analysis = require('../models/Analysis');
+const Requirement = require('../models/Requirement');
 
 // POST /api/analysis/test-detection — temporary test endpoint
 router.post('/test-detection', (req, res) => {
@@ -27,41 +29,6 @@ router.post('/test-detection', (req, res) => {
       incompleteness: result.incompleteness.length,
     },
     issues: result.allIssues,
-  });
-});
-
-// GET /api/analysis — get all analyses (history)
-router.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Get all analyses — logic coming on Day 20',
-    data: [],
-  });
-});
-
-// GET /api/analysis/:id — get a specific analysis by ID
-router.get('/:id', (req, res) => {
-  res.json({
-    success: true,
-    message: `Get analysis ${req.params.id} — logic coming on Day 16`,
-    data: null,
-  });
-});
-
-// POST /api/analysis — create/trigger a new analysis
-router.post('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Trigger analysis — logic coming on Day 16',
-    data: null,
-  });
-});
-
-// DELETE /api/analysis/:id — delete an analysis
-router.delete('/:id', (req, res) => {
-  res.json({
-    success: true,
-    message: `Delete analysis ${req.params.id} — logic coming on Day 21`,
   });
 });
 
@@ -113,6 +80,53 @@ router.post('/test-ai', async (req, res) => {
     original: text,
     aiResult: result,
   });
+});
+
+// GET /api/analysis — get all analyses
+router.get('/', async (req, res) => {
+  try {
+    const analyses = await Analysis.find()
+      .sort({ createdAt: -1 })
+      .select('-originalText'); // exclude large text field
+
+    res.json({ success: true, data: analyses });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/analysis/:id — get a specific analysis
+router.get('/:id', async (req, res) => {
+  try {
+    const analysis = await Analysis.findById(req.params.id);
+    if (!analysis) return res.status(404).json({ success: false, error: 'Analysis not found.' });
+
+    const requirements = await Requirement.find({ analysisId: req.params.id }).sort({ index: 1 });
+
+    res.json({ success: true, data: { analysis, requirements } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/analysis — create/trigger a new analysis
+router.post('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Trigger analysis — handled via /api/upload',
+    data: null,
+  });
+});
+
+// DELETE /api/analysis/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    await Analysis.findByIdAndDelete(req.params.id);
+    await Requirement.deleteMany({ analysisId: req.params.id });
+    res.json({ success: true, message: 'Analysis deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 module.exports = router;

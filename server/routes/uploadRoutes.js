@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fileValidator = require('../middleware/fileValidator');
-const { handleUpload } = require('../controllers/uploadController');
+const { runFullAnalysis } = require('../controllers/analysisController');
 
 // ── Multer config ──
 const storage = multer.diskStorage({
@@ -21,7 +21,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
-// POST /api/upload
-router.post('/', upload.single('document'), fileValidator, handleUpload);
+// POST /api/upload — full analysis pipeline
+router.post('/', upload.single('document'), fileValidator, runFullAnalysis);
 
 module.exports = router;
