@@ -3,8 +3,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 
 dotenv.config();
+
+// ── Ensure uploads directory exists ──
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads', { recursive: true });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
