@@ -1,122 +1,105 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import ScoreGauge from '../components/report/ScoreGauge';
 import IssueBreakdownChart from '../components/report/IssueBreakdownChart';
 import RequirementScoreChart from '../components/report/RequirementScoreChart';
 import ReportSummaryPanel from '../components/report/ReportSummaryPanel';
+import { fetchAnalysis } from '../api/index.js';
 import './DashboardPage.css';
 
-// ── Mock data — replaced with real API data on Day 16 ──
-const MOCK_ANALYSIS = {
-  fileName: 'SRS_Library_System_v1.2.pdf',
-  qualityScore: 54,
-  totalRequirements: 6,
-  processingTime: 3420,
-  issuesSummary: {
-    ambiguity: 3,
-    nonTestability: 2,
-    incompleteness: 2,
-    total: 7,
-  },
-};
+export default function DashboardPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-const MOCK_REQUIREMENTS = [
-  { id: '1', index: 1, requirementScore: 35, issues: [{ type: 'ambiguity' }, { type: 'non-testability' }], suggestedRewrite: 'suggested' },
-  { id: '2', index: 2, requirementScore: 28, issues: [{ type: 'non-testability' }, { type: 'ambiguity' }], suggestedRewrite: 'suggested' },
-  { id: '3', index: 3, requirementScore: 45, issues: [{ type: 'incompleteness' }, { type: 'incompleteness' }], suggestedRewrite: 'suggested' },
-  { id: '4', index: 4, requirementScore: 30, issues: [{ type: 'ambiguity' }], suggestedRewrite: 'suggested' },
-  { id: '5', index: 5, requirementScore: 88, issues: [], suggestedRewrite: null },
-  { id: '6', index: 6, requirementScore: 92, issues: [], suggestedRewrite: null },
-];
+  const [analysis, setAnalysis] = useState(null);
+  const [requirements, setRequirements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const PIE_DATA = [
-  { name: 'Ambiguous', value: 3 },
-  { name: 'Non-Testable', value: 2 },
-  { name: 'Incomplete', value: 2 },
-];
+  useEffect(() => {
+    const loadAnalysis = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchAnalysis(id);
+        setAnalysis(data.data.analysis);
+        setRequirements(data.data.requirements);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const BAR_DATA = MOCK_REQUIREMENTS.map((r) => ({
-  name: `REQ-${String(r.index).padStart(3, '0')}`,
-  score: r.requirementScore,
-}));
+    loadAnalysis();
+  }, [id]);
 
-function DashboardPage() {
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <h2>Failed to load dashboard</h2>
+        <p>{error}</p>
+        <button onClick={() => navigate('/upload')}>Try Again</button>
+      </div>
+    );
+  }
+
+  if (!analysis) return null;
+
+  // Build chart data from real requirements
+  const issueBreakdown = [
+    { name: 'Ambiguous', value: analysis.issuesSummary.ambiguity },
+    { name: 'Non-Testable', value: analysis.issuesSummary.nonTestability },
+    { name: 'Incomplete', value: analysis.issuesSummary.incompleteness },
+  ];
+
+  const requirementScores = requirements.map((r) => ({
+    name: `R${r.index}`,
+    score: r.requirementScore,
+    text: r.originalText?.substring(0, 40) + '...',
+    issueCount: r.issues.length,
+  }));
+
   return (
     <div className="dashboard-page">
-      <div className="dashboard-container">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Analysis Dashboard</h1>
+          <p className="dashboard-subtitle">{analysis.fileName}</p>
+        </div>
+        <button
+          className="btn-back"
+          onClick={() => navigate(`/results/${id}`)}
+        >
+          ← Back to Results
+        </button>
+      </div>
 
-        {/* ── Page Header ── */}
-        <div className="dashboard-header">
-          <div>
-            <h1 className="dashboard-title">Quality Dashboard</h1>
-            <p className="dashboard-subtitle">
-              Visual breakdown of your SRS document quality analysis.
-            </p>
-          </div>
-          <div className="dashboard-header-actions">
-            <button className="dashboard-btn-secondary">
-              View Results →
-            </button>
-            <button className="dashboard-btn-primary">
-              Export PDF Report
-            </button>
-          </div>
+      <div className="dashboard-grid">
+        <div className="dashboard-card">
+          <ScoreGauge score={analysis.qualityScore} />
         </div>
 
-        {/* ── File Info Bar ── */}
-        <div className="dashboard-file-bar">
-          <span className="dashboard-file-icon">📄</span>
-          <div>
-            <p className="dashboard-file-name">{MOCK_ANALYSIS.fileName}</p>
-            <p className="dashboard-file-meta">
-              {MOCK_ANALYSIS.totalRequirements} requirements analyzed ·{' '}
-              {MOCK_ANALYSIS.processingTime}ms processing time
-            </p>
-          </div>
+        <div className="dashboard-card">
+          <IssueBreakdownChart data={issueBreakdown} />
         </div>
 
-        {/* ── Main Grid ── */}
-        <div className="dashboard-grid">
-
-          {/* Score Gauge Card */}
-          <div className="dashboard-card dashboard-card-gauge">
-            <h2 className="dashboard-card-title">Quality Score</h2>
-            <ScoreGauge score={MOCK_ANALYSIS.qualityScore} />
-          </div>
-
-          {/* Issue Breakdown Card */}
-          <div className="dashboard-card dashboard-card-pie">
-            <h2 className="dashboard-card-title">Issue Breakdown</h2>
-            <p className="dashboard-card-subtitle">
-              Distribution of detected defect types
-            </p>
-            <IssueBreakdownChart data={PIE_DATA} />
-          </div>
-
-          {/* Summary Panel Card */}
-          <div className="dashboard-card dashboard-card-summary">
-            <h2 className="dashboard-card-title">Analysis Summary</h2>
-            <p className="dashboard-card-subtitle">
-              Key metrics and recommendations
-            </p>
-            <ReportSummaryPanel
-              analysis={MOCK_ANALYSIS}
-              requirements={MOCK_REQUIREMENTS}
-            />
-          </div>
-
-          {/* Requirement Scores Card */}
-          <div className="dashboard-card dashboard-card-bar">
-            <h2 className="dashboard-card-title">Per-Requirement Scores</h2>
-            <p className="dashboard-card-subtitle">
-              Individual quality score for each requirement
-            </p>
-            <RequirementScoreChart data={BAR_DATA} />
-          </div>
-
+        <div className="dashboard-card dashboard-card--wide">
+          <RequirementScoreChart data={requirementScores} />
         </div>
 
+        <div className="dashboard-card">
+          <ReportSummaryPanel analysis={analysis} requirements={requirements} />
+        </div>
       </div>
     </div>
   );
 }
-
-export default DashboardPage;

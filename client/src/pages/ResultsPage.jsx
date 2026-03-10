@@ -1,253 +1,178 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import ResultsSummary from '../components/analysis/ResultsSummary';
 import RequirementCard from '../components/analysis/RequirementCard';
+import { fetchAnalysis } from '../api/index.js';
 import './ResultsPage.css';
 
-// ── Mock data — replaced with real API data on Day 16 ──
-const MOCK_ANALYSIS = {
-  fileName: 'SRS_Library_System_v1.2.pdf',
-  qualityScore: 54,
-  totalRequirements: 6,
-  processingTime: 3420,
-  issuesSummary: {
-    ambiguity: 3,
-    nonTestability: 2,
-    incompleteness: 2,
-    total: 7,
-  },
-};
-
-const MOCK_REQUIREMENTS = [
-  {
-    id: '1',
-    index: 1,
-    originalText:
-      'The system shall respond quickly to all user requests at all times.',
-    requirementScore: 35,
-    issues: [
-      {
-        type: 'ambiguity',
-        description: 'The word "quickly" is vague and does not specify a measurable response time.',
-        flaggedWord: 'quickly',
-        severity: 'high',
-        detectedBy: 'rule-based',
-      },
-      {
-        type: 'non-testability',
-        description: '"At all times" cannot be verified without specific availability metrics.',
-        flaggedWord: 'at all times',
-        severity: 'medium',
-        detectedBy: 'rule-based',
-      },
-    ],
-    suggestedRewrite:
-      'The system shall respond to all user requests within 2 seconds under normal load (up to 500 concurrent users) and within 5 seconds under peak load.',
-    rewriteExplanation:
-      'Replaced "quickly" with a specific time metric (2 seconds), added load conditions, and defined "at all times" with measurable thresholds.',
-  },
-  {
-    id: '2',
-    index: 2,
-    originalText:
-      'The user interface shall be intuitive and easy to use for all users.',
-    requirementScore: 28,
-    issues: [
-      {
-        type: 'non-testability',
-        description: '"Intuitive" and "easy to use" are subjective and cannot be objectively tested.',
-        flaggedWord: 'intuitive',
-        severity: 'high',
-        detectedBy: 'ai',
-      },
-      {
-        type: 'ambiguity',
-        description: '"All users" is vague — does not specify user roles or accessibility requirements.',
-        flaggedWord: 'all users',
-        severity: 'medium',
-        detectedBy: 'rule-based',
-      },
-    ],
-    suggestedRewrite:
-      'The user interface shall achieve a System Usability Scale (SUS) score of at least 75 in usability testing with a sample of 20 representative users from each defined user role.',
-    rewriteExplanation:
-      'Replaced subjective terms with the SUS standard metric, specified a measurable threshold, and defined the user population clearly.',
-  },
-  {
-    id: '3',
-    index: 3,
-    originalText:
-      'Shall allow users to upload files to the system.',
-    requirementScore: 45,
-    issues: [
-      {
-        type: 'incompleteness',
-        description: 'Missing subject — does not specify which actor (user role) can perform this action.',
-        flaggedWord: null,
-        severity: 'high',
-        detectedBy: 'rule-based',
-      },
-      {
-        type: 'incompleteness',
-        description: 'Missing constraints — no file type, size limit, or storage destination specified.',
-        flaggedWord: null,
-        severity: 'medium',
-        detectedBy: 'ai',
-      },
-    ],
-    suggestedRewrite:
-      'Authenticated users shall be able to upload PDF and TXT files up to 10MB in size to their personal workspace. The system shall reject files exceeding the size limit with an appropriate error message.',
-    rewriteExplanation:
-      'Added the actor (authenticated users), defined allowed file types, specified size constraints, and described error handling behavior.',
-  },
-  {
-    id: '4',
-    index: 4,
-    originalText:
-      'The system shall provide adequate security for all stored data.',
-    requirementScore: 30,
-    issues: [
-      {
-        type: 'ambiguity',
-        description: '"Adequate security" is vague and does not reference any security standard.',
-        flaggedWord: 'adequate',
-        severity: 'high',
-        detectedBy: 'rule-based',
-      },
-    ],
-    suggestedRewrite:
-      'The system shall encrypt all stored user data using AES-256 encryption and comply with OWASP Top 10 security guidelines.',
-    rewriteExplanation:
-      'Replaced "adequate security" with a specific encryption standard (AES-256) and a recognized security framework (OWASP Top 10).',
-  },
-  {
-    id: '5',
-    index: 5,
-    originalText:
-      'The system shall generate monthly reports for administrators.',
-    requirementScore: 88,
-    issues: [],
-    suggestedRewrite: null,
-    rewriteExplanation: null,
-  },
-  {
-    id: '6',
-    index: 6,
-    originalText:
-      'The system shall send email notifications to registered users within 5 minutes of a status change.',
-    requirementScore: 92,
-    issues: [],
-    suggestedRewrite: null,
-    rewriteExplanation: null,
-  },
+const FILTERS = ['All', 'With Issues', 'Ambiguous', 'Non-Testable', 'Incomplete', 'No Issues'];
+const SORTS = [
+  { value: 'index', label: 'Order' },
+  { value: 'score-asc', label: 'Score ↑' },
+  { value: 'score-desc', label: 'Score ↓' },
 ];
 
-// ── Filter options ──
-const FILTER_OPTIONS = [
-  { value: 'all', label: 'All Requirements' },
-  { value: 'issues', label: 'With Issues Only' },
-  { value: 'ambiguity', label: 'Ambiguous' },
-  { value: 'non-testability', label: 'Non-Testable' },
-  { value: 'incompleteness', label: 'Incomplete' },
-  { value: 'clean', label: 'No Issues' },
-];
-
-function ResultsPage() {
+export default function ResultsPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('index');
 
-  const filteredRequirements = MOCK_REQUIREMENTS.filter((req) => {
-    if (filter === 'all') return true;
-    if (filter === 'issues') return req.issues.length > 0;
-    if (filter === 'clean') return req.issues.length === 0;
-    return req.issues.some((issue) => issue.type === filter);
-  }).sort((a, b) => {
-    if (sortBy === 'score-asc') return a.requirementScore - b.requirementScore;
-    if (sortBy === 'score-desc') return b.requirementScore - a.requirementScore;
-    return a.index - b.index;
-  });
+  const [analysis, setAnalysis] = useState(null);
+  const [requirements, setRequirements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeSort, setActiveSort] = useState('index');
+
+  useEffect(() => {
+    const loadAnalysis = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchAnalysis(id);
+        setAnalysis(data.data.analysis);
+        setRequirements(data.data.requirements);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnalysis();
+  }, [id]);
+
+  const getFilteredRequirements = () => {
+    let filtered = [...requirements];
+
+    switch (activeFilter) {
+      case 'With Issues':
+        filtered = filtered.filter((r) => r.issues.length > 0);
+        break;
+      case 'Ambiguous':
+        filtered = filtered.filter((r) => r.issues.some((i) => i.type === 'ambiguity'));
+        break;
+      case 'Non-Testable':
+        filtered = filtered.filter((r) => r.issues.some((i) => i.type === 'non-testability'));
+        break;
+      case 'Incomplete':
+        filtered = filtered.filter((r) => r.issues.some((i) => i.type === 'incompleteness'));
+        break;
+      case 'No Issues':
+        filtered = filtered.filter((r) => r.issues.length === 0);
+        break;
+      default:
+        break;
+    }
+
+    switch (activeSort) {
+      case 'score-asc':
+        filtered.sort((a, b) => a.requirementScore - b.requirementScore);
+        break;
+      case 'score-desc':
+        filtered.sort((a, b) => b.requirementScore - a.requirementScore);
+        break;
+      default:
+        filtered.sort((a, b) => a.index - b.index);
+        break;
+    }
+
+    return filtered;
+  };
+
+  if (loading) {
+    return (
+      <div className="results-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading analysis results...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="results-error">
+        <h2>Failed to load analysis</h2>
+        <p>{error}</p>
+        <button onClick={() => navigate('/upload')}>Try Again</button>
+      </div>
+    );
+  }
+
+  if (!analysis) return null;
+
+  const filteredRequirements = getFilteredRequirements();
+
+  // Build summary data from real analysis
+  const summaryData = {
+    fileName: analysis.fileName,
+    fileType: analysis.fileType,
+    qualityScore: analysis.qualityScore,
+    totalRequirements: analysis.totalRequirements,
+    issuesSummary: analysis.issuesSummary,
+    processingTime: analysis.processingTime,
+    createdAt: analysis.createdAt,
+  };
 
   return (
     <div className="results-page">
-      <div className="results-container">
+      <ResultsSummary analysis={summaryData} />
 
-        {/* ── Page Header ── */}
-        <div className="results-header">
-          <div>
-            <h1 className="results-title">Analysis Results</h1>
-            <p className="results-subtitle">
-              Review detected issues and AI-powered improvement suggestions
-              for each requirement.
-            </p>
-          </div>
-          <button
-            className="results-export-btn"
-            onClick={() => navigate('/dashboard/123')}
-          >
-            View Dashboard →
-          </button>
-        </div>
-
-        {/* ── Summary Banner ── */}
-        <ResultsSummary analysis={MOCK_ANALYSIS} />
-
-        {/* ── Filter & Sort Bar ── */}
-        <div className="results-controls">
-          <div className="results-filters">
-            {FILTER_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                className={`filter-btn ${filter === opt.value ? 'filter-btn-active' : ''}`}
-                onClick={() => setFilter(opt.value)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="results-sort">
-            <label htmlFor="sort" className="sort-label">Sort by:</label>
-            <select
-              id="sort"
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+      <div className="results-controls">
+        <div className="filter-bar">
+          {FILTERS.map((filter) => (
+            <button
+              key={filter}
+              className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
+              onClick={() => setActiveFilter(filter)}
             >
-              <option value="index">Requirement order</option>
-              <option value="score-asc">Score: Low to High</option>
-              <option value="score-desc">Score: High to Low</option>
-            </select>
-          </div>
+              {filter}
+            </button>
+          ))}
         </div>
 
-        {/* ── Results Count ── */}
-        <p className="results-count">
-          Showing <strong>{filteredRequirements.length}</strong> of{' '}
-          <strong>{MOCK_REQUIREMENTS.length}</strong> requirements
-        </p>
-
-        {/* ── Requirement Cards ── */}
-        <div className="results-list">
-          {filteredRequirements.length > 0 ? (
-            filteredRequirements.map((req) => (
-              <RequirementCard
-                key={req.id}
-                requirement={req}
-                index={req.index}
-              />
-            ))
-          ) : (
-            <div className="results-empty">
-              <span className="results-empty-icon">🔍</span>
-              <p>No requirements match this filter.</p>
-            </div>
-          )}
+        <div className="sort-bar">
+          <span className="sort-label">Sort by:</span>
+          {SORTS.map((sort) => (
+            <button
+              key={sort.value}
+              className={`sort-btn ${activeSort === sort.value ? 'active' : ''}`}
+              onClick={() => setActiveSort(sort.value)}
+            >
+              {sort.label}
+            </button>
+          ))}
         </div>
+      </div>
 
+      <div className="results-count">
+        Showing {filteredRequirements.length} of {requirements.length} requirements
+      </div>
+
+      <div className="requirements-list">
+        {filteredRequirements.map((req) => (
+          <RequirementCard
+            key={req._id}
+            requirement={{
+              id: req._id,
+              index: req.index,
+              text: req.originalText,
+              score: req.requirementScore,
+              issues: req.issues,
+              suggestedRewrite: req.suggestedRewrite,
+              rewriteExplanation: req.rewriteExplanation,
+              hasIssues: req.issues.length > 0,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="results-actions">
+        <button
+          className="btn-dashboard"
+          onClick={() => navigate(`/dashboard/${id}`)}
+        >
+          View Dashboard →
+        </button>
       </div>
     </div>
   );
 }
-
-export default ResultsPage;

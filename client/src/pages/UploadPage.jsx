@@ -13,11 +13,11 @@ const UPLOAD_STATES = {
 };
 
 function UploadPage() {
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [uploadState, setUploadState] = useState(UPLOAD_STATES.IDLE);
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
-  const navigate = useNavigate();
 
   const handleFileSelect = (selectedFile) => {
     setFile(selectedFile);
@@ -33,54 +33,43 @@ function UploadPage() {
     setProgress(0);
   };
 
-  const simulateProgress = () => {
-    // Simulates upload progress bar — real progress wired on Day 16
-    return new Promise((resolve) => {
-      let current = 0;
-      const interval = setInterval(() => {
-        current += Math.random() * 15;
-        if (current >= 100) {
-          current = 100;
-          clearInterval(interval);
-          resolve();
-        }
-        setProgress(Math.min(Math.round(current), 100));
-      }, 200);
-    });
-  };
-
   const handleAnalyze = async () => {
     if (!file) return;
 
     setUploadState(UPLOAD_STATES.UPLOADING);
-    setProgress(0);
-    setErrorMsg('');
+    setProgress(20);
 
     try {
-      // Simulate upload progress
-      await simulateProgress();
+      setProgress(40);
       setUploadState(UPLOAD_STATES.PROCESSING);
 
-      // TODO: Day 16 — replace this with real API call
-      // const formData = new FormData();
-      // formData.append('document', file);
-      // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/upload`, {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-      // const data = await response.json();
-      // navigate(`/results/${data.analysisId}`);
+      const { uploadDocument } = await import('../api/index.js');
+      const data = await uploadDocument(file);
 
-      // Placeholder — simulates processing delay
-      await new Promise((r) => setTimeout(r, 1500));
+      setProgress(100);
+
+      // Save analysisId to localStorage for history
+      const history = JSON.parse(localStorage.getItem('reqclarity_history') || '[]');
+      history.unshift({
+        id: data.analysisId,
+        fileName: file.name,
+        score: data.documentScore.overallScore,
+        label: data.documentScore.label,
+        date: new Date().toISOString(),
+      });
+      localStorage.setItem('reqclarity_history', JSON.stringify(history.slice(0, 50)));
+
       setUploadState(UPLOAD_STATES.SUCCESS);
 
-      // Will navigate to results page once backend is ready on Day 16
-      // navigate(`/results/${analysisId}`);
+      setTimeout(() => {
+        navigate(`/results/${data.analysisId}`);
+      }, 800);
 
-    } catch (err) {
+    } catch (error) {
+      console.error('Upload error:', error);
+      setErrorMsg(error.message || 'Something went wrong. Please try again.');
       setUploadState(UPLOAD_STATES.ERROR);
-      setErrorMsg('Upload failed. Please check your connection and try again.');
+      setProgress(0);
     }
   };
 
@@ -145,14 +134,14 @@ function UploadPage() {
             </div>
           )}
 
-          {/* Success State — temporary until Day 16 */}
+          {/* Success State */}
           {uploadState === UPLOAD_STATES.SUCCESS && (
             <div className="upload-success">
               <span className="upload-success-icon">✅</span>
               <div>
-                <p className="upload-success-title">Upload successful!</p>
+                <p className="upload-success-title">Analysis complete!</p>
                 <p className="upload-success-subtitle">
-                  Backend processing will be connected on Day 16. Results page coming soon.
+                  Redirecting to your results...
                 </p>
               </div>
             </div>
@@ -162,7 +151,7 @@ function UploadPage() {
           {uploadState === UPLOAD_STATES.ERROR && (
             <div className="upload-error">
               <span>⚠️</span>
-              <p>{errorMsg}</p>
+              <p>{errorMsg || 'Something went wrong. Please try again.'}</p>
             </div>
           )}
 
@@ -205,7 +194,7 @@ function UploadPage() {
             <span className="upload-info-icon">🤖</span>
             <div>
               <h4>AI-powered rewrites</h4>
-              <p>Claude AI generates context-aware suggestions for each flagged requirement.</p>
+              <p>Gemini AI generates context-aware suggestions for each flagged requirement.</p>
             </div>
           </div>
           <div className="upload-info-card">
