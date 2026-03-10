@@ -14,7 +14,17 @@ const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow Postman, mobile apps (no origin)
+    if (!origin) return callback(null, true);
+    // Allow localhost dev
+    if (origin.startsWith('http://localhost')) return callback(null, true);
+    // Allow ALL Vercel deployments (main + preview URLs)
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Allow custom domain if set
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
