@@ -101,6 +101,7 @@ export default function ResultsPage() {
   if (!analysis) return null;
 
   const filteredRequirements = getFilteredRequirements();
+  const rewritableCount = requirements.filter((r) => r.suggestedRewrite).length;
 
   // Build summary data from real analysis
   const summaryData = {
@@ -171,8 +172,16 @@ export default function ResultsPage() {
           className="btn-export"
           onClick={() => exportToPDF(analysis, requirements)}
         >
-          ⬇ Export PDF Report
+          ⬇ Export Analysis Report
         </button>
+        {rewritableCount > 0 && (
+          <button
+            className="btn-rewrite"
+            onClick={() => navigate(`/rewrite/${id}`)}
+          >
+            ✏ Generate Rewritten SRS ({rewritableCount} rewrites)
+          </button>
+        )}
         <button
           className="btn-dashboard"
           onClick={() => navigate(`/dashboard/${id}`)}

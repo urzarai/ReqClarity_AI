@@ -6,6 +6,7 @@ import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage';
+import RewritePage from './pages/RewritePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ContactPage from './pages/ContactPage';
 
@@ -20,6 +21,7 @@ function App() {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/results/:id" element={<ResultsPage />} />
             <Route path="/dashboard/:id" element={<DashboardPage />} />
+            <Route path="/rewrite/:id" element={<RewritePage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<NotFoundPage />} />

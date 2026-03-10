@@ -26,7 +26,7 @@ const getIssueColor = (type) => {
 };
 
 // ════════════════════════════════════════
-// MAIN EXPORT FUNCTION
+// ANALYSIS REPORT EXPORT
 // ════════════════════════════════════════
 
 export const exportToPDF = (analysis, requirements) => {
@@ -38,7 +38,6 @@ export const exportToPDF = (analysis, requirements) => {
   const contentW = pageW - margin * 2;
   let y = 0;
 
-  // ── Helper: add new page if needed ──
   const checkPage = (neededHeight = 20) => {
     if (y + neededHeight > pageH - 20) {
       doc.addPage();
@@ -46,7 +45,6 @@ export const exportToPDF = (analysis, requirements) => {
     }
   };
 
-  // ── Helper: draw a horizontal divider ──
   const drawDivider = (color = [226, 232, 240]) => {
     doc.setDrawColor(...color);
     doc.setLineWidth(0.3);
@@ -54,15 +52,10 @@ export const exportToPDF = (analysis, requirements) => {
     y += 4;
   };
 
-  // ════════════════════════════════════
-  // PAGE 1 — HEADER & SUMMARY
-  // ════════════════════════════════════
-
   // Header background
   doc.setFillColor(79, 70, 229);
   doc.rect(0, 0, pageW, 42, 'F');
 
-  // Title
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   doc.setTextColor(255, 255, 255);
@@ -73,7 +66,6 @@ export const exportToPDF = (analysis, requirements) => {
   doc.setTextColor(199, 210, 254);
   doc.text('SRS Quality Analysis Report', margin, 24);
 
-  // File name + date
   doc.setFontSize(8);
   doc.setTextColor(199, 210, 254);
   const date = new Date(analysis.createdAt).toLocaleDateString('en-US', {
@@ -83,7 +75,6 @@ export const exportToPDF = (analysis, requirements) => {
 
   y = 54;
 
-  // ── Overall Score Box ──
   const scoreRGB = getScoreRGB(analysis.qualityScore);
   doc.setFillColor(...scoreRGB);
   doc.roundedRect(margin, y, 50, 24, 3, 3, 'F');
@@ -108,7 +99,6 @@ export const exportToPDF = (analysis, requirements) => {
   y += 34;
   drawDivider();
 
-  // ── Issue Summary Row ──
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(30, 41, 59);
@@ -145,14 +135,12 @@ export const exportToPDF = (analysis, requirements) => {
   y += 26;
   drawDivider();
 
-  // ── Requirements Summary Table ──
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(30, 41, 59);
   doc.text('Requirements Overview', margin, y);
   y += 7;
 
-  // Table header
   doc.setFillColor(241, 245, 249);
   doc.rect(margin, y, contentW, 7, 'F');
   doc.setFont('helvetica', 'bold');
@@ -164,10 +152,8 @@ export const exportToPDF = (analysis, requirements) => {
   doc.text('Issues', margin + contentW - 12, y + 5);
   y += 8;
 
-  // Table rows
   requirements.forEach((req, idx) => {
     checkPage(10);
-
     const rowColor = idx % 2 === 0 ? [255, 255, 255] : [248, 250, 252];
     doc.setFillColor(...rowColor);
     doc.rect(margin, y - 1, contentW, 8, 'F');
@@ -177,20 +163,17 @@ export const exportToPDF = (analysis, requirements) => {
     doc.setTextColor(30, 41, 59);
     doc.text(String(req.index), margin + 2, y + 4);
 
-    // Truncate long requirement text
     const maxLen = 85;
     const text = req.originalText?.length > maxLen
       ? req.originalText.substring(0, maxLen) + '...'
       : req.originalText || '';
     doc.text(text, margin + 10, y + 4);
 
-    // Score with color
     const sRGB = getScoreRGB(req.requirementScore);
     doc.setTextColor(...sRGB);
     doc.setFont('helvetica', 'bold');
     doc.text(String(req.requirementScore), margin + contentW - 28, y + 4);
 
-    // Issue count
     doc.setTextColor(req.issues.length > 0 ? 239 : 34, req.issues.length > 0 ? 68 : 197, req.issues.length > 0 ? 68 : 94);
     doc.text(String(req.issues.length), margin + contentW - 10, y + 4);
 
@@ -198,10 +181,6 @@ export const exportToPDF = (analysis, requirements) => {
   });
 
   y += 4;
-
-  // ════════════════════════════════════
-  // PAGE 2+ — DETAILED ISSUES
-  // ════════════════════════════════════
 
   const reqsWithIssues = requirements.filter((r) => r.issues.length > 0);
 
@@ -219,7 +198,6 @@ export const exportToPDF = (analysis, requirements) => {
     reqsWithIssues.forEach((req) => {
       checkPage(40);
 
-      // Requirement header
       doc.setFillColor(241, 245, 249);
       doc.roundedRect(margin, y, contentW, 10, 2, 2, 'F');
 
@@ -234,7 +212,6 @@ export const exportToPDF = (analysis, requirements) => {
 
       y += 13;
 
-      // Original text
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(30, 41, 59);
@@ -243,7 +220,6 @@ export const exportToPDF = (analysis, requirements) => {
       doc.text(lines, margin + 2, y);
       y += lines.length * 5 + 4;
 
-      // Issues list
       req.issues.forEach((issue) => {
         checkPage(12);
         const iRGB = getIssueColor(issue.type);
@@ -264,7 +240,6 @@ export const exportToPDF = (analysis, requirements) => {
         y += 11;
       });
 
-      // AI Rewrite if available
       if (req.suggestedRewrite) {
         checkPage(20);
         doc.setFillColor(236, 253, 245);
@@ -289,7 +264,6 @@ export const exportToPDF = (analysis, requirements) => {
     });
   }
 
-  // ── Footer on last page ──
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -304,7 +278,211 @@ export const exportToPDF = (analysis, requirements) => {
     );
   }
 
-  // ── Save ──
   const safeName = analysis.fileName.replace(/\.[^/.]+$/, '');
   doc.save(`ReqClarity_${safeName}_Report.pdf`);
+};
+
+// ════════════════════════════════════════
+// REWRITTEN DOCUMENT EXPORT
+// ════════════════════════════════════════
+
+export const exportRewrittenPDF = (analysis, finalRequirements) => {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentW = pageW - margin * 2;
+  let y = 0;
+
+  const checkPage = (needed = 20) => {
+    if (y + needed > pageH - 20) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  const drawDivider = (color = [226, 232, 240]) => {
+    doc.setDrawColor(...color);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, pageW - margin, y);
+    y += 4;
+  };
+
+  // ── Header Banner ──
+  doc.setFillColor(16, 185, 129);
+  doc.rect(0, 0, pageW, 42, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(255, 255, 255);
+  doc.text('ReqClarity AI', margin, 16);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(209, 250, 229);
+  doc.text('Rewritten SRS Document', margin, 24);
+
+  doc.setFontSize(8);
+  const rewrittenCount = finalRequirements.filter((r) => r.wasRewritten).length;
+  const date = new Date().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+  doc.text(
+    `File: ${analysis.fileName}   |   ${rewrittenCount} rewrites applied   |   Generated: ${date}`,
+    margin,
+    34
+  );
+
+  y = 54;
+
+  // ── Summary Stats Row ──
+  const stats = [
+    { label: 'Total Requirements', value: finalRequirements.length, rgb: [16, 185, 129] },
+    { label: 'Rewrites Applied', value: rewrittenCount, rgb: [79, 70, 229] },
+    { label: 'Kept Original', value: finalRequirements.filter((r) => !r.wasRewritten && r.issues?.length > 0).length, rgb: [245, 158, 11] },
+    { label: 'No Issues', value: finalRequirements.filter((r) => !r.issues?.length).length, rgb: [100, 116, 139] },
+  ];
+
+  const boxW = (contentW - 9) / 4;
+  stats.forEach((s, i) => {
+    const x = margin + i * (boxW + 3);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, y, boxW, 18, 2, 2, 'F');
+    doc.setDrawColor(...s.rgb);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(x, y, boxW, 18, 2, 2, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...s.rgb);
+    doc.text(String(s.value), x + boxW / 2, y + 10, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(100, 116, 139);
+    doc.text(s.label, x + boxW / 2, y + 15, { align: 'center' });
+  });
+
+  y += 28;
+  drawDivider();
+
+  // ── Section Title ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(30, 41, 59);
+  doc.text('Requirements (Individual)', margin, y);
+  y += 8;
+
+  // ════════════════════════════════════
+  // SECTION 1 — Individual Req Cards
+  // ════════════════════════════════════
+  finalRequirements.forEach((req) => {
+    checkPage(30);
+
+    // Header bar — fixed: badge right-aligned using pageW - margin - 3
+    const headerColor = req.wasRewritten ? [237, 233, 254] : [241, 245, 249];
+    const borderColor = req.wasRewritten ? [139, 92, 246] : [203, 213, 225];
+    doc.setFillColor(...headerColor);
+    doc.roundedRect(margin, y, contentW, 8, 1, 1, 'F');
+    doc.setDrawColor(...borderColor);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, y, contentW, 8, 1, 1, 'S');
+
+    // Req index — left
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`REQ-${String(req.index).padStart(3, '0')}`, margin + 3, y + 5.5);
+
+    // Badge — right-aligned so it never overflows
+    if (req.wasRewritten) {
+      doc.setTextColor(109, 40, 217);
+      doc.text('AI Rewritten', pageW - margin - 3, y + 5.5, { align: 'right' });
+    }
+
+    y += 11;
+
+    // Requirement text
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    const lines = doc.splitTextToSize(req.finalText, contentW - 4);
+    checkPage(lines.length * 5.5 + 8);
+    doc.text(lines, margin + 2, y);
+    y += lines.length * 5.5 + 8;
+  });
+
+  // ════════════════════════════════════
+  // SECTION 2 — Complete SRS as bullet list
+  // ════════════════════════════════════
+  doc.addPage();
+  y = 20;
+
+  // Section header with green accent
+  doc.setFillColor(16, 185, 129);
+  doc.rect(margin, y, 4, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(30, 41, 59);
+  doc.text('Complete Rewritten SRS', margin + 8, y + 7.5);
+  y += 18;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(
+    `${rewrittenCount} requirements rewritten by AI · ${finalRequirements.length - rewrittenCount} kept original`,
+    margin,
+    y
+  );
+  y += 8;
+  drawDivider([16, 185, 129]);
+
+  // Bullet list of all requirements
+  finalRequirements.forEach((req) => {
+    const bulletText = `${String(req.index).padStart(2, ' ')}. ${req.finalText}`;
+    const lines = doc.splitTextToSize(bulletText, contentW - 8);
+    checkPage(lines.length * 5.5 + 5);
+
+    // Subtle left marker for rewritten ones
+    if (req.wasRewritten) {
+      doc.setFillColor(109, 40, 217);
+      doc.rect(margin, y - 1, 2, lines.length * 5.5 + 1, 'F');
+    }
+
+    doc.setFont('helvetica', req.wasRewritten ? 'normal' : 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(req.wasRewritten ? 15 : 30, req.wasRewritten ? 23 : 41, req.wasRewritten ? 42 : 59);
+    doc.text(lines, margin + 6, y);
+
+    // Small "rewritten" note inline
+    if (req.wasRewritten) {
+      const lastLineY = y + (lines.length - 1) * 5.5;
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7);
+      doc.setTextColor(139, 92, 246);
+      doc.text('[AI rewritten]', pageW - margin - 2, lastLineY, { align: 'right' });
+    }
+
+    y += lines.length * 5.5 + 4;
+  });
+
+  // ── Footer on every page ──
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(148, 163, 184);
+    doc.text(
+      `ReqClarity AI — Rewritten SRS  |  Page ${i} of ${totalPages}  |  ${analysis.fileName}`,
+      pageW / 2,
+      pageH - 8,
+      { align: 'center' }
+    );
+  }
+
+  const safeName = analysis.fileName.replace(/\.[^/.]+$/, '');
+  doc.save(`ReqClarity_${safeName}_Rewritten.pdf`);
 };
