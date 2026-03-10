@@ -20,6 +20,22 @@ function HomePage() {
           incompleteness in your SRS documents — then rewrites them using AI.
           Free, fast, and built for engineers.
         </p>
+
+        {/* ── CTA Buttons ── */}
+        <div className="hero-actions">
+          <Link to="/upload" className="btn-hero-primary">
+            Analyze My SRS <span className="btn-arrow">→</span>
+          </Link>
+          <a
+            href="https://github.com/urzarai/ReqClarity_AI"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-hero-secondary"
+          >
+            View on GitHub
+          </a>
+        </div>
+
         <p className="hero-note">
           Free to use · No sign-up required · Supports PDF &amp; TXT
         </p>
@@ -137,7 +153,7 @@ function HomePage() {
             </div>
             <h3>AI-Powered Rewrites</h3>
             <p>
-              Claude AI generates context-aware rewrites for flagged requirements
+              Llama 3.3 generates context-aware rewrites for flagged requirements
               with clear explanations for every change.
             </p>
           </div>
@@ -167,8 +183,8 @@ function HomePage() {
             </div>
             <h3>Analysis History</h3>
             <p>
-              Every analysis is saved. Revisit past reports, track improvement
-              over document versions, and compare results.
+              Every analysis is saved locally. Revisit past reports, track
+              improvement over document versions, and compare results.
             </p>
           </div>
         </div>
@@ -206,7 +222,7 @@ function HomePage() {
             <div className="step-content">
               <h3>AI Generates Rewrites</h3>
               <p>
-                For every flagged requirement, Claude AI suggests a clearer,
+                For every flagged requirement, Llama 3.3 suggests a clearer,
                 more precise rewrite with a full explanation.
               </p>
             </div>
@@ -224,6 +240,7 @@ function HomePage() {
           </div>
         </div>
       </section>
+
     </div>
   );
 }

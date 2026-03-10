@@ -4,6 +4,7 @@ import ResultsSummary from '../components/analysis/ResultsSummary';
 import RequirementCard from '../components/analysis/RequirementCard';
 import { fetchAnalysis } from '../api/index.js';
 import './ResultsPage.css';
+import { exportToPDF } from '../services/exportService.js';
 
 const FILTERS = ['All', 'With Issues', 'Ambiguous', 'Non-Testable', 'Incomplete', 'No Issues'];
 const SORTS = [
@@ -166,6 +167,12 @@ export default function ResultsPage() {
       </div>
 
       <div className="results-actions">
+        <button
+          className="btn-export"
+          onClick={() => exportToPDF(analysis, requirements)}
+        >
+          ⬇ Export PDF Report
+        </button>
         <button
           className="btn-dashboard"
           onClick={() => navigate(`/dashboard/${id}`)}

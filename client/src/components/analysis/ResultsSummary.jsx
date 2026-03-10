@@ -1,45 +1,62 @@
 import './ResultsSummary.css';
 
 function ResultsSummary({ analysis }) {
-  const { fileName, qualityScore, totalRequirements, issuesSummary, processingTime } = analysis;
+  const { fileName, fileType, qualityScore, totalRequirements, issuesSummary, processingTime, createdAt } = analysis;
 
-  const getScoreLabel = (score) => {
-    if (score >= 80) return { label: 'Good', className: 'summary-score-good' };
-    if (score >= 60) return { label: 'Fair', className: 'summary-score-fair' };
-    if (score >= 40) return { label: 'Poor', className: 'summary-score-poor' };
-    return { label: 'Critical', className: 'summary-score-critical' };
+  const getScoreConfig = (score) => {
+    if (score >= 90) return { label: 'Excellent', cls: 'summary-score-excellent', color: '#22c55e' };
+    if (score >= 75) return { label: 'Good', cls: 'summary-score-good', color: '#84cc16' };
+    if (score >= 60) return { label: 'Fair', cls: 'summary-score-fair', color: '#eab308' };
+    if (score >= 40) return { label: 'Poor', cls: 'summary-score-poor', color: '#f97316' };
+    return { label: 'Critical', cls: 'summary-score-critical', color: '#ef4444' };
   };
 
-  const { label, className } = getScoreLabel(qualityScore);
+  const { label, cls, color } = getScoreConfig(qualityScore);
+
+  const formatDate = (iso) => {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    });
+  };
+
+  // processingTime may be in ms (number) or seconds (string like "5.79")
+  const formatTime = (t) => {
+    if (!t) return '';
+    const num = parseFloat(t);
+    if (num > 100) return `${(num / 1000).toFixed(1)}s`; // came as ms
+    return `${num}s`;
+  };
 
   return (
     <div className="results-summary">
 
       {/* ── Score Block ── */}
-      <div className={`summary-score-block ${className}`}>
-        <div className="summary-score-number">{qualityScore}</div>
+      <div className={`summary-score-block ${cls}`} style={{ borderColor: color }}>
+        <div className="summary-score-number" style={{ color }}>{qualityScore}</div>
         <div className="summary-score-info">
-          <span className="summary-score-label">{label}</span>
+          <span className="summary-score-label" style={{ color }}>{label}</span>
           <span className="summary-score-desc">Quality Score</span>
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="summary-divider"></div>
+      <div className="summary-divider" />
 
       {/* ── File Info ── */}
       <div className="summary-file">
-        <span className="summary-file-icon">📄</span>
+        <span className="summary-file-icon">
+          {fileType === 'pdf' ? '📕' : '📄'}
+        </span>
         <div>
           <p className="summary-file-name">{fileName}</p>
           <p className="summary-file-meta">
-            {totalRequirements} requirements · {processingTime}ms
+            {totalRequirements} requirements · {formatTime(processingTime)}
+            {createdAt && <> · {formatDate(createdAt)}</>}
           </p>
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="summary-divider"></div>
+      <div className="summary-divider" />
 
       {/* ── Issue Counts ── */}
       <div className="summary-issues">
