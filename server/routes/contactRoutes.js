@@ -1,16 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // POST /api/contact
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   // Basic validation
   if (!name || !email || !subject || !message) {
     return res.status(400).json({
       success: false,
-      error: 'All fields are required.',
+      error: "All fields are required.",
     });
   }
 
@@ -19,14 +19,15 @@ router.post('/', async (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(400).json({
       success: false,
-      error: 'Please provide a valid email address.',
+      error: "Please provide a valid email address.",
     });
   }
 
   try {
     // Configure transporter
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
+      family: 4,
       auth: {
         user: process.env.CONTACT_EMAIL,
         pass: process.env.CONTACT_EMAIL_PASSWORD,
@@ -95,14 +96,14 @@ router.post('/', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Message sent successfully! Check your email for a confirmation.',
+      message:
+        "Message sent successfully! Check your email for a confirmation.",
     });
-
   } catch (error) {
-    console.error('❌ Email send failed:', error.message);
+    console.error("❌ Email send failed:", error.message);
     res.status(500).json({
       success: false,
-      error: 'Failed to send message. Please try again later.',
+      error: "Failed to send message. Please try again later.",
     });
   }
 });
