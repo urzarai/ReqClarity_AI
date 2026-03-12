@@ -94,7 +94,7 @@ function ContactPage() {
                 <span className="alert-icon">✅</span>
                 <div>
                   <strong>Message sent!</strong>
-                  <p>Thanks for reaching out. Check your inbox for a confirmation email.</p>
+                  <p>Thanks for reaching out! We have received your message and will respond soon</p>
                 </div>
               </div>
             )}
